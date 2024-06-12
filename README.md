@@ -46,13 +46,6 @@ This project involves developing a local desktop application using Python's Tkin
    - Final documentation.
    - Review and feedback.
    - Project presentation and deployment.
-
- Communication and Collaboration Tools:
-- Version Control: GitHub (for code repository and version control)
-- Project Management: Trello (for task management and progress tracking)
-- Communication: Slack (for team communication and updates)
-- Documentation: Google Docs (for collaborative documentation)
-
 This project aims to enhance our skills in developing desktop applications, working with local servers, and managing CSV files effectively. By dividing the workload and collaborating efficiently, we will ensure a successful project outcome.
 
 Feel free to reach out if you have any questions or need further clarifications. Let's work together to make this project a success!
