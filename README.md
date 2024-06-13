@@ -1,4 +1,4 @@
- #LabApp
+ LabApp
  Project Overview
 
  Subject: Software Development
