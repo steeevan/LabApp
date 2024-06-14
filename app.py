@@ -1,104 +1,136 @@
 from tkinter import *
 from tkinter import ttk
-#TODO maybe read csv file to get all names
+from main import CSVFileManager
+
+# Initialize the CSV manager
+csv_manager = CSVFileManager('student_evaluations.csv')
+csv_manager.create_csv(['Name', 'Level', 'Subject', 'Rating', 'Title', 'Description', 'Instructor', 'Comments'])
+
 class Student:
-    students=[]
-    def __init__(self,name: str,level: str,subject="Python"):
-        self.name=name
-        self.level=level
-        self.subject=subject
+    students = []
+
+    def __init__(self, name: str, level: str, subject="Python"):
+        self.name = name
+        self.level = level
+        self.subject = subject
         __class__.students.append(self)
-#add some random students
-#TODO make this based on reading some weird file or something
+
+# Add some random students
 def makeStudents():
-    Student("Bobina","Rookie")
-    Student("Bobby","Rookie")
-    Student("Guy","Rookie")
-    Student("Jiafei","Advanced")
-    Student("Candice","Intermediate")
-    Student("Joe Mama","Intermediate")
+    Student("Bobina", "Rookie")
+    Student("Bobby", "Rookie")
+    Student("Guy", "Rookie")
+    Student("Jiafei", "Advanced")
+    Student("Candice", "Intermediate")
+    Student("Joe Mama", "Intermediate")
+
 makeStudents()
+
 def getNames():
-    names=[]
+    names = []
     for stu in Student.students:
         names.append(stu.name)
     return names
-def getSubject():
-    return ["Python","VEX"]
-def getInstructors():
-    return ["Estevan","Aiden"]
 
-#TODO fix
+def getSubject():
+    return ["Python", "VEX"]
+
+def getInstructors():
+    return ["Estevan", "Aiden"]
+
 def getLevels():
-    return ["Rookie","Intermediate","Advanced"]
+    return ["Rookie", "Intermediate", "Advanced"]
 
 class Option:
-    menu=[]
+    menu = []
+
     def __init__(self, root: Tk, label: str, wid: Widget):
-        self.label=Label(root,text=label)
-        self.label.grid(row=len(__class__.menu),column=0)
-        self.wid=wid
-        wid.grid(row=len(__class__.menu),column=1)
+        self.label = Label(root, text=label, font=('Arial', 12))
+        self.label.grid(row=len(__class__.menu), column=0, sticky=W, padx=10, pady=5)
+        self.wid = wid
+        wid.grid(row=len(__class__.menu), column=1, padx=10, pady=5)
         __class__.menu.append(self)
+
     @staticmethod
     def getOption(name: str):
         for opt in __class__.menu:
-            if opt.label.cget("text")==name:
+            if opt.label.cget("text") == name:
                 return opt
 
 class OptionButton(Option):
     def __init__(self, root: Tk, label: str, wid: Widget, button: Button):
-        super().__init__(root,label,wid)
-        self.button=button
-        button.grid(row=len(super().menu)-1,column=2)
-    
+        super().__init__(root, label, wid)
+        self.button = button
+        button.grid(row=len(super().menu)-1, column=2, padx=10, pady=5)
+
 root = Tk()
 root.geometry("600x600")
 root.resizable(0, 0)
-root.title("Evaluation menu")
-root.grid_columnconfigure(0, weight=1)
-namesBox=ttk.Combobox(root, values=getNames())
-Option(root,"Name", namesBox)
-levels=ttk.Combobox(root, values=getLevels())
+root.title("Evaluation Menu")
+root.configure(bg="#f0f0f0")
+
+namesBox = ttk.Combobox(root, values=getNames(), font=('Arial', 12))
+Option(root, "Name", namesBox)
+
+levels = ttk.Combobox(root, values=getLevels(), font=('Arial', 12))
+
 def filterLevels():
-    level=levels.get()
-    names=[]
+    level = levels.get()
+    names = []
     for stu in Student.students:
-        if(stu.level==level):
+        if stu.level == level:
             names.append(stu.name)
     namesBox.configure(values=names)
     namesBox.set("")
-OptionButton(root,"Levels", levels, Button(root,text="Filter",command=filterLevels))
-Option(root,"Subject",ttk.Combobox(root, values=getSubject()))
-Option(root,"Rating", Scale(root,from_=1,to_=5,orient=HORIZONTAL))
-Option(root,"Title", Entry(root))
-Option(root,"Description",Text(root,height=4,width=35))
-Option(root,"Instructor", ttk.Combobox(root,values=getInstructors()))
-comment=Text(root,height=10,width=35)
-comment.grid(padx=20)
-Option(root,"Comments",comment)
 
-#TODO send to csv stuff
+OptionButton(root, "Level", levels, Button(root, text="Filter", command=filterLevels, font=('Arial', 12)))
+Option(root, "Subject", ttk.Combobox(root, values=getSubject(), font=('Arial', 12)))
+Option(root, "Rating", Scale(root, from_=1, to_=5, orient=HORIZONTAL, font=('Arial', 12)))
+Option(root, "Title", Entry(root, font=('Arial', 12)))
+Option(root, "Description", Text(root, height=4, width=35, font=('Arial', 12)))
+Option(root, "Instructor", ttk.Combobox(root, values=getInstructors(), font=('Arial', 12)))
+comment = Text(root, height=10, width=35, font=('Arial', 12))
+comment.grid(row=len(Option.menu), column=1, padx=10, pady=5)
+Option(root, "Comments", comment)
+
 def submitButton():
-    data={}
+    data = {}
     for opt in Option.menu:
-        if(isinstance(opt.wid,Entry) or isinstance(opt.wid,Scale)):
-            data[opt.label.cget("text")]=opt.wid.get()
-        elif(isinstance(opt.wid,ttk.Combobox)):
-            data[opt.label.cget("text")]=opt.wid.widget.get()
-        elif(isinstance(opt.wid,Text)):
-            data[opt.label.cget("text")]=opt.wid.get("1.0",END)
+        if isinstance(opt.wid, Entry) or isinstance(opt.wid, Scale):
+            data[opt.label.cget("text")] = opt.wid.get()
+        elif isinstance(opt.wid, ttk.Combobox):
+            data[opt.label.cget("text")] = opt.wid.get()
+        elif isinstance(opt.wid, Text):
+            data[opt.label.cget("text")] = opt.wid.get("1.0", END).strip()
+    
+    # Convert data to a list in the correct order
+    row = [
+        data.get("Name", ""),
+        data.get("Level", ""),
+        data.get("Subject", ""),
+        data.get("Rating", ""),
+        data.get("Title", ""),
+        data.get("Description", ""),
+        data.get("Instructor", ""),
+        data.get("Comments", "")
+    ]
+    
+    # Add the row to the CSV
+    csv_manager.add_row(row)
     print(data)
+
 def clearButton():
     for opt in Option.menu:
-        #print(type(opt.wid))
-        if(isinstance(opt.wid,Entry)):
-            opt.wid.delete(0,END)
-        elif(isinstance(opt.wid,ttk.Combobox)):
+        if isinstance(opt.wid, Entry):
+            opt.wid.delete(0, END)
+        elif isinstance(opt.wid, ttk.Combobox):
             opt.wid.set("")
-        elif(isinstance(opt.wid,Text)):
-            opt.wid.delete("1.0",END)
-submit=Button(root,text="Submit",command=submitButton).grid(row=len(Option.menu),column=0)
-clear=Button(root,text="Clear",command=clearButton).grid(row=len(Option.menu),column=1)
-root.mainloop()
+        elif isinstance(opt.wid, Text):
+            opt.wid.delete("1.0", END)
 
+submit = Button(root, text="Submit", command=submitButton, font=('Arial', 12))
+submit.grid(row=len(Option.menu), column=0, padx=10, pady=10)
+clear = Button(root, text="Clear", command=clearButton, font=('Arial', 12))
+clear.grid(row=len(Option.menu), column=1, padx=10, pady=10)
+
+root.mainloop()
