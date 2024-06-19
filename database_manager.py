@@ -96,7 +96,7 @@ class DatabaseManager:
 
 # Example usage
 # Uncomment the following lines to see the class in action
-
+'''
 db_manager = DatabaseManager('example.db')
 db_manager.create_connection()
 create_table_query = """
@@ -116,3 +116,4 @@ select_users_query = "SELECT * FROM users"
 users = db_manager.execute_read_query(select_users_query)
 print(users)
 db_manager.close_connection()
+'''

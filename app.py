@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from main import CSVFileManager
-
+from database_manager import DatabaseManager
 # Initialize the CSV manager
 csv_manager = CSVFileManager('student_evaluations.csv')
 csv_manager.create_csv(['Name', 'Level', 'Subject', 'Rating', 'Title', 'Description', 'Instructor', 'Comments'])
@@ -17,13 +17,14 @@ class Student:
 
 # Add some random students
 def makeStudents():
-    Student("Bobina", "Rookie")
-    Student("Bobby", "Rookie")
-    Student("Guy", "Rookie")
-    Student("Jiafei", "Advanced")
-    Student("Candice", "Intermediate")
-    Student("Joe Mama", "Intermediate")
-
+    d=DatabaseManager("school.db")
+    d.create_connection()
+    users = d.execute_read_query("SELECT name FROM students")
+    print(users)
+    levels=d.execute_read_query("SELECT level FROM students")
+    for i in range(len(users)):
+        Student(users[i][0],levels[i][0])
+    d.close_connection()
 makeStudents()
 
 def getNames():
@@ -117,7 +118,8 @@ def submitButton():
     
     # Add the row to the CSV
     csv_manager.add_row(row)
-    print(data)
+
+    #print(data)
 
 def clearButton():
     for opt in Option.menu:
