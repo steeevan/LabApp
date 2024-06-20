@@ -2,13 +2,13 @@ from tkinter import *
 from tkinter import ttk
 from main import CSVFileManager
 from database_manager import DatabaseManager
+import os
+from datetime import datetime
 # Initialize the CSV manager
-csv_manager = CSVFileManager('student_evaluations.csv')
-csv_manager.create_csv(['Name', 'Level', 'Subject', 'Rating', 'Title', 'Description', 'Instructor', 'Comments'])
+
 
 class Student:
     students = []
-
     def __init__(self, name: str, level: str, subject="Python"):
         self.name = name
         self.level = level
@@ -115,10 +115,17 @@ def submitButton():
         data.get("Instructor", ""),
         data.get("Comments", "")
     ]
-    
-    # Add the row to the CSV
-    csv_manager.add_row(row)
-
+    #print(data.get("Name"))
+    path="Students/"+data.get("Name")
+    if(not os.path.exists(path)):
+        os.makedirs(path)
+    path+="/"+data.get("Name")+"-"+str(datetime.now().month)+"-"+str(datetime.now().year)+".csv"
+    c=CSVFileManager(path)
+    if(os.path.exists(path)):
+        c.read_csv()
+    else:
+        c.create_csv(['Name', 'Level', 'Subject', 'Rating', 'Title', 'Description', 'Instructor', 'Comments'])
+    c.add_row(row)
     #print(data)
 
 def clearButton():
