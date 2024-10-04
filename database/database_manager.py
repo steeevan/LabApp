@@ -1,5 +1,8 @@
+# database/database_manager.py
+
 import sqlite3
 from sqlite3 import Error
+import os
 
 class DatabaseManager:
     """
@@ -7,22 +10,10 @@ class DatabaseManager:
     """
 
     def __init__(self, db_file):
-        """
-        Initializes the DatabaseManager with the specified database file.
-
-        Args:
-            db_file (str): The path to the SQLite database file.
-        """
         self.db_file = db_file
         self.conn = None
 
     def create_connection(self):
-        """
-        Creates a connection to the SQLite database.
-
-        Returns:
-            Connection object or None.
-        """
         try:
             self.conn = sqlite3.connect(self.db_file)
             print(f"Connection to SQLite DB '{self.db_file}' successful")
@@ -32,24 +23,11 @@ class DatabaseManager:
         return self.conn
 
     def close_connection(self):
-        """
-        Closes the connection to the SQLite database.
-        """
         if self.conn:
             self.conn.close()
             print("Connection to SQLite DB closed")
 
     def execute_query(self, query, params=None):
-        """
-        Executes a SQL query.
-
-        Args:
-            query (str): The SQL query to execute.
-            params (tuple): Optional parameters to bind to the query.
-
-        Returns:
-            True if the query was executed successfully, False otherwise.
-        """
         if not self.conn:
             print("No database connection")
             return False
@@ -68,16 +46,6 @@ class DatabaseManager:
             return False
 
     def execute_read_query(self, query, params=None):
-        """
-        Executes a SQL read query and returns the result.
-
-        Args:
-            query (str): The SQL query to execute.
-            params (tuple): Optional parameters to bind to the query.
-
-        Returns:
-            list of tuples containing the query result.
-        """
         if not self.conn:
             print("No database connection")
             return []
@@ -94,25 +62,33 @@ class DatabaseManager:
             print(f"Error '{e}' occurred while executing read query")
             return []
 
-# Example usage
-# Uncomment the following lines to see the class in action
+    # New methods for user management
+    def create_user_table(self):
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL
+        );
+        """
+        self.execute_query(create_table_query)
 
-db_manager = DatabaseManager('example.db')
-db_manager.create_connection()
-create_table_query = """
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    age INTEGER,
-    gender TEXT,
-    nationality TEXT
-);
-"""
-db_manager.execute_query(create_table_query)
-insert_user_query = "INSERT INTO users (name, age, gender, nationality) VALUES (?, ?, ?, ?)"
-user_data = ("James", 25, "male", "USA")
-db_manager.execute_query(insert_user_query, user_data)
-select_users_query = "SELECT * FROM users"
-users = db_manager.execute_read_query(select_users_query)
-print(users)
-db_manager.close_connection()
+    def add_user(self, username, password, role):
+        insert_user_query = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)"
+        return self.execute_query(insert_user_query, (username, password, role))
+
+    def get_user(self, username):
+        select_user_query = "SELECT * FROM users WHERE username = ?"
+        users = self.execute_read_query(select_user_query, (username,))
+        return users[0] if users else None
+
+
+# Create the users table if it does not exist
+if __name__ == "__main__":
+    # Set the path for the new database in the assets folder
+    os.makedirs("assets", exist_ok=True)
+    db_manager = DatabaseManager("assets/users.db")
+    db_manager.create_connection()
+    db_manager.create_user_table()
+    db_manager.close_connection()

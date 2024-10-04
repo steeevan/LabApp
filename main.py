@@ -1,71 +1,103 @@
-import pandas as pd
-import os
-import csv
+# main.py
+from tkinter import Tk
+from views.login_view import LoginView
+from views.register_view import RegisterView
+from views.manager_dashboard import ManagerDashboard
+from views.instructor_dashboard import InstructorDashboard
+from views.parent_dashboard import ParentDashboard
+from views.student_dashboard import StudentDashboard
+from views.account_settings import AccountSettings
 
-class CSVFileManager:
-    def __init__(self, file_path):
-        self.file_path = file_path
-    
-    def create_csv(self, header):
-        if not os.path.exists(self.file_path):
-            with open(self.file_path, 'w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(header)
-            print(f"CSV file '{self.file_path}' created with header: {header}")
-    
-    def read_csv(self):
-        try:
-            df = pd.read_csv(self.file_path)
-            print(df)
-        except FileNotFoundError:
-            print(f"File '{self.file_path}' does not exist.")
-    
-    def add_row(self, row):
-        try:
-            with open(self.file_path, 'a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(row)
-            print(f"Row added: {row}")
-        except FileNotFoundError:
-            print(f"File '{self.file_path}' does not exist.")
-    
-    def update_row(self, row_num, new_row):
-        try:
-            df = pd.read_csv(self.file_path)
-            df.loc[row_num] = new_row
-            df.to_csv(self.file_path, index=False)
-            print(f"Row {row_num} updated to: {new_row}")
-        except FileNotFoundError:
-            print(f"File '{self.file_path}' does not exist.")
-        except IndexError:
-            print(f"Row number {row_num} is out of range.")
-    
-    def delete_row(self, row_num):
-        try:
-            df = pd.read_csv(self.file_path)
-            deleted_row = df.loc[row_num].to_dict()
-            df = df.drop(row_num).reset_index(drop=True)
-            df.to_csv(self.file_path, index=False)
-            print(f"Row {row_num} deleted: {deleted_row}")
-        except FileNotFoundError:
-            print(f"File '{self.file_path}' does not exist.")
-        except IndexError:
-            print(f"Row number {row_num} is out of range.")
-    
-    def delete_csv(self):
-        try:
-            os.remove(self.file_path)
-            print(f"CSV file '{self.file_path}' deleted.")
-        except FileNotFoundError:
-            print(f"File '{self.file_path}' does not exist.")
+class MainApplication:
+    def __init__(self, root):
+        self.root = root
+        self.current_frame = None
+        self.current_user = None
 
-# Example usage
-# csv_manager = CSVFileManager('student_evaluations.csv')
-# csv_manager.create_csv(['Name', 'Level', 'Subject', 'Rating', 'Title', 'Description', 'Instructor', 'Comments'])
-# csv_manager.add_row(['William', '3', 'English', '5', 'Youtuber', 'created video with roblox recording and edited it with canva and capcut', 'Estevan', 'Great job'])
-# csv_manager.read_csv()
-# csv_manager.update_row(1, ['Austin', '3', 'Tuesday', '6/15', 'Small Youtuber', 'obs studio', 'edited video they recorded for roblox', '9/10', 'Mr. Estevan'])
-# csv_manager.read_csv()
-# csv_manager.delete_row(0)
-# csv_manager.read_csv()
-# csv_manager.delete_csv()
+        self.show_login_view()
+
+    def show_login_view(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = LoginView(self.root, None, self.on_login, self.show_register_view)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def show_register_view(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = RegisterView(self.root, None, self.show_login_view)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def on_login(self, user):
+        self.current_user = user
+        if user.role == "Manager":
+            self.show_manager_dashboard()
+        elif user.role == "Instructor":
+            self.show_instructor_dashboard()
+        elif user.role == "Parent":
+            self.show_parent_dashboard()
+        elif user.role == "Student":
+            self.show_student_dashboard()
+
+    def show_manager_dashboard(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = ManagerDashboard(self.root, None, self.logout, self.show_account_settings)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def show_instructor_dashboard(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = InstructorDashboard(self.root, None, self.logout, self.show_account_settings)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def show_parent_dashboard(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = ParentDashboard(self.root, None, self.logout, self.show_account_settings)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def show_student_dashboard(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = StudentDashboard(self.root, None, self.logout, self.show_account_settings)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def show_account_settings(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
+
+        self.current_frame = AccountSettings(self.root, None, self.current_user, self.go_back_to_dashboard)
+        self.current_frame.pack(expand=True, fill="both")
+
+    def go_back_to_dashboard(self):
+        # Redirect to the correct dashboard based on the current user's role
+        if self.current_user.role == "Manager":
+            self.show_manager_dashboard()
+        elif self.current_user.role == "Instructor":
+            self.show_instructor_dashboard()
+        elif self.current_user.role == "Parent":
+            self.show_parent_dashboard()
+        elif self.current_user.role == "Student":
+            self.show_student_dashboard()
+
+    def logout(self):
+        # Logout the user and redirect to login view
+        self.current_user = None
+        self.show_login_view()
+
+if __name__ == "__main__":
+    root = Tk()
+    root.geometry("800x600")
+    root.resizable(0, 0)
+    root.title("Student Management System")
+    root.configure(bg="#f0f0f0")
+
+    app = MainApplication(root)
+    root.mainloop()
